@@ -76,8 +76,8 @@ router.put('/update/employee/:id',(req,res,next)=>{
     
     //sql query
     let sql = `UPDATE empdetail SET  
-               fname = ${req.body.fname}               
-               WHERE id = ${req.params.id}`;
+               fname = '${req.body.fname}'               
+               WHERE id = '${req.params.id}'`;
 
     //run query
     connection.query(sql,(err,result)=>{
@@ -98,6 +98,7 @@ router.delete('/delete/empoloyee/:id',(req,res)=>{
     connection.query(sql,(err,result)=>{
         if(err) throw err;
         res.json({SUCCESS:true,message:"delete successfully"});
+        console.log(result)
     })
 })
 
