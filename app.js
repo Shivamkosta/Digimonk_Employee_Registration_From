@@ -1,15 +1,8 @@
 const express = require('express');
 const bodyParser = require('body-parser');
-// const uploadimage = require('./routers/file');
-
+const morgan = require('morgan');
 const app = express();
 require('dotenv').config();
-
-
-
-
-//import router
-const employeeRouter = require('./routers/employee');
 
 app.get('/',(req,res)=>{
     res.send('Hello world');
@@ -18,9 +11,12 @@ app.get('/',(req,res)=>{
 //use middleware
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({extended:false}));
+app.use(morgan());
+
+//import router
+const employeeRouter = require('./routers/employee');
 
 app.use('/api',employeeRouter);
-// app.post('/upload/image',uploadimage);
 
 
 const port = process.env.PORT || 5000

@@ -3,6 +3,7 @@ const router = express.Router();
 const connection = require('./connection');
 const upload = require('./file');
 
+// GET API
 router.get('/get/employee',(req,res,next)=>{
     console.log('get api is running');
     res.writeHead(200,{'Content-Type':'text/json'});
@@ -14,6 +15,21 @@ router.get('/get/employee',(req,res,next)=>{
     } )
 })
 
+//Read single data
+router.get('/get/read/:id',(req,res)=>{
+    console.log(req.params.id);
+    //sql query
+    let sql = `SELECT * FROM empdetail WHERE id = ${req.params.id} `;
+
+    //run query
+    connection.query(sql,(err,result)=>{
+        if(err) throw err;
+        res.json({SUCCESS:true,result});
+        console.log("result :",result);
+    })
+})
+
+//CREATE API
 router.post('/submit',(req,res,next)=>{
     console.log(req.body);
     connection.query(
@@ -52,6 +68,37 @@ router.post('/submit',(req,res,next)=>{
             }
         }
     )
+});
+
+//UPDATE API
+router.put('/update/employee/:id',(req,res,next)=>{
+    console.log(req.params.id);
+    
+    //sql query
+    let sql = `UPDATE empdetail SET  
+               fname = ${req.body.fname}               
+               WHERE id = ${req.params.id}`;
+
+    //run query
+    connection.query(sql,(err,result)=>{
+        if(err) throw err;
+        res.json({SUCCESS:true,message:'data updated'});
+        console.log(result)
+    })
+})
+
+//delete single data
+router.delete('/delete/empoloyee/:id',(req,res)=>{
+    console.log(req.params.id);
+    //sql query
+    let sql = `DELETE FROM empdetail
+               WHERE id = ${req.params.id}`;
+    
+    //run query
+    connection.query(sql,(err,result)=>{
+        if(err) throw err;
+        res.json({SUCCESS:true,message:"delete successfully"});
+    })
 })
 
 module.exports=router;
