@@ -7,13 +7,20 @@ const jwt = require("jsonwebtoken"); // to generate signed token
 const expressJwt = require("express-jwt"); // for authorization check
 
 router.post('/email',(req,res)=>{
-    // var e = req.body.email;
-    // console.log(e);
+     var e = req.body.email;
+     console.log(e);
     
     var otp = Math.floor(100000 + Math.random() * 900000);
     console.log(otp);
    
-   var mail = connection.query(`SELECT * FROM joining WHERE email = ${req.body.email}`,(err,user)=>{
+   var mail = connection.query(
+    "insert into joining(email) value(?)",
+    [            
+        
+        req.body.email,
+             
+
+    ],(err,user)=>{
         console.log("mail :",mail);   
     if(err) {
             res.status(400).json({
@@ -30,7 +37,7 @@ router.post('/email',(req,res)=>{
 
         //return response with user and token to frontend client
         const { firstname,lastname,dob,email,gender,matrimony,mobileno,dateofjoining,presentaddress,permanentaddress,PF,emergencyname,relation,emergencycontact,emergencyaddress } = user;
-        console.log("id :",id)
+        //console.log("id :",id)
         console.log('fname :',firstname);
         console.log('lname :',lastname);
         console.log('dob :',dob);
@@ -47,7 +54,7 @@ router.post('/email',(req,res)=>{
         console.log('emergencycontact :',emergencycontact);
         console.log('emergencyaddress :',emergencyaddress);
 
-        return res.json({token , user:{ id,firstname,lastname,dob,email,gender,matrimony,dateofjoining,presenetaddress,permanentaddress,PF,emergencyname,relation,emergencycontact,emergencyaddress }})
+        return res.json({token , user:{ firstname,lastname,dob,email,gender,matrimony,dateofjoining,presentaddress,permanentaddress,PF,emergencyname,relation,emergencycontact,emergencyaddress }})
     })
 
 const transporter = nodemailer.createTransport({
@@ -63,7 +70,7 @@ const transporter = nodemailer.createTransport({
 
 var mailOption = {
     from : 'shivamkosti570@gmail.com',
-    to :mail,
+    to :e,mail,
     subject:'send mail',
      text : `<p> we have received a request to have your password reset for <b>KOOKY ACCOUNT</b>.
     if you did not make this request ,plese ignore this email.<br>
