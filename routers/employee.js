@@ -2,24 +2,53 @@ const express = require('express');
 const router = express.Router();
 const connection = require('./connection');
 const upload = require('./imageupload');
-const sendmail = require('../sendmail');
 const nodemailer = require('nodemailer');
+const jwt = require("jsonwebtoken"); // to generate signed token
+const expressJwt = require("express-jwt"); // for authorization check
 
 router.post('/email',(req,res)=>{
-    var e = req.body.email;
-    console.log(e);
+    // var e = req.body.email;
+    // console.log(e);
     
     var otp = Math.floor(100000 + Math.random() * 900000);
     console.log(otp);
-    const message = `<p> we have received a request to have your password reset for <b>KOOKY ACCOUNT</b>.
-      if you did not make this request ,plese ignore this email.<br>
-      <br> To reset your password,plese <a href = "#"><b>visit the link</b></a> </p> <hr>
-      <h3><b> Having trouble?</b></h3>
-      <p>if the above link does not work try copying this link into your browser.</p>
-      <p>${otp}</p></hr>
-      <h3><b> Question ?<b></h3>
-      <p>plese let us know if there's anything we can help you with by replying to this email or by emailing <b>Kooky.com</b></p>`;
-      
+   
+   var mail = connection.query(`SELECT * FROM joining WHERE email = ${req.body.email}`,(err,user)=>{
+        console.log("mail :",mail);   
+    if(err) {
+            res.status(400).json({
+                error : 'Email not found'
+            })
+        }
+
+        //generate a signed token with user email with secret
+        const token = jwt.sign({ name:'shivam' },process.env.JWT_TOKEN);
+        console.log("generate token :",token);
+
+        //save token in cookies
+        res.cookie("token",token,{expire : new Date() + 9999});
+
+        //return response with user and token to frontend client
+        const { firstname,lastname,dob,email,gender,matrimony,mobileno,dateofjoining,presentaddress,permanentaddress,PF,emergencyname,relation,emergencycontact,emergencyaddress } = user;
+        console.log("id :",id)
+        console.log('fname :',firstname);
+        console.log('lname :',lastname);
+        console.log('dob :',dob);
+        console.log('email :',email);
+        console.log('gender :',gender);
+        console.log('matrimony :',matrimony);
+        console.log('mobileno :',mobileno);
+        console.log('datofjoining :',dateofjoining);
+        console.log('presentaddress :',presentaddress);
+        console.log('permanentaddress :',permanentaddress);
+        console.log('PF :',PF);
+        console.log('emergencyname :',emergencyname);
+        console.log('relation :',relation);
+        console.log('emergencycontact :',emergencycontact);
+        console.log('emergencyaddress :',emergencyaddress);
+
+        return res.json({token , user:{ id,firstname,lastname,dob,email,gender,matrimony,dateofjoining,presenetaddress,permanentaddress,PF,emergencyname,relation,emergencycontact,emergencyaddress }})
+    })
 
 const transporter = nodemailer.createTransport({
     host:'smtp.gmail.com',
@@ -34,7 +63,7 @@ const transporter = nodemailer.createTransport({
 
 var mailOption = {
     from : 'shivamkosti570@gmail.com',
-    to :e,
+    to :mail,
     subject:'send mail',
      text : `<p> we have received a request to have your password reset for <b>KOOKY ACCOUNT</b>.
     if you did not make this request ,plese ignore this email.<br>
@@ -53,14 +82,7 @@ transporter.sendMail(mailOption,function(err,info){
         console.log('Email Sent successfully :'+info.response)
     }
 });
-
-    (err,result)=>{
-        if(err) res.status(400).json({SUCCESS:false})
-        res.status(201).json({SUCCESS:true})
-        console.log(result)
-    }
-
-   
+  
 })
 
 // router.post('/upload',(req,res)=>{
@@ -128,7 +150,7 @@ router.post('/upload/image',(req,res)=>{
 router.get('/get/employee',(req,res,next)=>{
     console.log('get api is running');
     res.writeHead(200,{'Content-Type':'text/json'});
-    connection.query('Select * from empdetail',(err,result)=>{
+    connection.query('Select * from joining',(err,result)=>{
         if(err) throw err;
         res.write(JSON.stringify(result));
         console.log(res.write(JSON.stringify(result)))
@@ -140,7 +162,7 @@ router.get('/get/employee',(req,res,next)=>{
 router.get('/get/read/:id',(req,res)=>{
     console.log(req.params.id);
     //sql query
-    let sql = `SELECT * FROM empdetail WHERE id = ${req.params.id} `;
+    let sql = `SELECT * FROM joining WHERE id = ${req.params.id} `;
 
     //run query
     connection.query(sql,(err,result)=>{
@@ -206,10 +228,10 @@ router.get('/get/read/:id',(req,res)=>{
 router.post('/empdetails',(req,res,next)=>{
     console.log(req.body);
     connection.query(
-        "insert into empdetail(fname,lname,dob,email,gender,matrimony,mobile,dateofjoining,presentaddress,permanentaddress,bankname,ifsc,bankaccountno,relation,PF,emergencyname,emergencycontact,emergencyaddress) values(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
+        "insert into joining(firstname,lastname,dob,email,gender,matrimony,mobile,dateofjoining,presentaddress,permanentaddress,bankname,ifsc,bankaccountno,relation,PF,emergencyname,emergencycontact,emergencyaddress) values(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
         [            
-            req.body.fname,
-            req.body.lname,
+            req.body.firstname,
+            req.body.lastname,
             req.body.dob,
             req.body.email,
             req.body.gender,
@@ -244,7 +266,7 @@ router.post('/empdetails',(req,res,next)=>{
 router.post('/upload',upload.any(),(req,res,next)=>{
     console.log(req.body);
     connection.query(
-        "insert into empdetail(photo,highschool,highersecondry,graduation,postgraduation) values(?,?,?,?,?)",
+        "insert into joining(photo,highschool,highersecondry,graduation,postgraduation) values(?,?,?,?,?)",
         [            
             req.body.photo,
             req.body.highschool,
@@ -308,8 +330,8 @@ router.put('/update/empdetails/:id',(req,res,next)=>{
     console.log(req.params.id);
 
     var x = req.body;
-    var fname = x.fname;
-    var lname = x.lname;
+    var firstname = x.firstname;
+    var lastname = x.lastname;
     var dob = x.dob;
     var email = x.email;
     var gender = x.gender;
@@ -320,11 +342,11 @@ router.put('/update/empdetails/:id',(req,res,next)=>{
     var permanentaddress = x.permanentaddress;
 
 
-    connection.query(`Update empdetail SET fname=?,lname=?,dob=?,email=?,gender=?,matrimony=?,mobile=?,dateofjoining=?,presentaddress=?,permanentaddress=? WHERE id='${req.params.id}'`
-    ,[fname,lname,dob,email,gender,matrimony,mobile,dateofjoining,presentaddress,permanentaddress],
+    connection.query(`Update joining SET fname=?,lname=?,dob=?,email=?,gender=?,matrimony=?,mobile=?,dateofjoining=?,presentaddress=?,permanentaddress=? WHERE id='${req.params.id}'`
+    ,[firstname,lastname,dob,email,gender,matrimony,mobile,dateofjoining,presentaddress,permanentaddress],
     function(err,result){
         if(err) throw err;
-        res.json({SUCCESS:true,message:'User has been updated successfully'})
+        res.json({SUCCESS:true,message:'User has been updated successfully',id:req.params.id})
         console.log(result)
     })
 
@@ -340,7 +362,7 @@ router.put('/update/bankdetails/:id',(req,res,next)=>{
     var bankaccount = x.bankaccount;
     
 
-    connection.query(`Update empdetail SET bankname=?,ifsc=?,bankaccount=? WHERE id='${req.params.id}'`
+    connection.query(`Update joining SET bankname=?,ifsc=?,bankaccount=? WHERE id='${req.params.id}'`
     ,[bankname,ifsc,bankaccount],
     function(err,result){
         if(err) throw err;
@@ -360,7 +382,7 @@ router.put('/update/emergencydetails/:id',(req,res,next)=>{
     var emergencyaddress = x.emergencyaddress;
     
 
-    connection.query(`Update empdetail SET PF=?,emergencyname=?,emergencycontact=?,emergencyaddress=? WHERE id='${req.params.id}'`
+    connection.query(`Update joining SET PF=?,emergencyname=?,emergencycontact=?,emergencyaddress=? WHERE id='${req.params.id}'`
     ,[PF,emergencyname,emergencycontact,emergencyaddress],
     function(err,result){
         if(err) throw err;
@@ -373,7 +395,7 @@ router.put('/update/emergencydetails/:id',(req,res,next)=>{
 router.delete('/delete/empoloyee/:id',(req,res)=>{
     console.log(req.params.id);
     //sql query
-    let sql = `DELETE FROM empdetail
+    let sql = `DELETE FROM joining
                WHERE id = ${req.params.id}`;
     
     //run query
