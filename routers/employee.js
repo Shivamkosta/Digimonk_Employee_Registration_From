@@ -9,7 +9,7 @@ router.post('/email',(req,res)=>{
     var e = req.body.email;
     console.log(e);
     
-    const otp = Math.floor(10000 + Math.random() * 90000);
+    var otp = Math.floor(100000 + Math.random() * 900000);
     console.log(otp);
     const message = `<p> we have received a request to have your password reset for <b>KOOKY ACCOUNT</b>.
       if you did not make this request ,plese ignore this email.<br>
@@ -151,55 +151,55 @@ router.get('/get/read/:id',(req,res)=>{
 })
 
 
-router.post(
-    "/login",
-    async (req, res, next) => {
-      const user = connection.query(`insert into empdetail (email) value(?) `,
-        [req.body.email]
-      )
-      if (!user) {
-        return next(new AppError("there is no user with email address", 200));
-      }
-      const otp = Math.floor(10000 + Math.random() * 90000);
-      console.log(otp);
-      //    const resetToken = createPasswordResetToken(otp);
-      //await user.save({ validateBeforeSave: false });
-      const message = `<p> we have received a request to have your password reset for <b>KOOKY ACCOUNT</b>.
-      if you did not make this request ,plese ignore this email.<br>
-      <br> To reset your password,plese <a href = "#"><b>visit the link</b></a> </p> <hr>
-      <h3><b> Having trouble?</b></h3>
-      <p>if the above link does not work try copying this link into your browser.</p>
-      <p>${otp}</p></hr>
-      <h3><b> Question ?<b></h3>
-      <p>plese let us know if there's anything we can help you with by replying to this email or by emailing <b>Kooky.com</b></p>`;
-      try {
-        await sendmail({
-          email: user.email,
-          subject: `Hi,${user.name},here's how to reset your password.(valid for 10 mins)`,
-          message,
-        });
-        // const updateOtp = await Registration.findByIdAndUpdate(
-        //   { _id: user._id },
-        //   {
-        //     $set: {
-        //       otp: otp,
-        //     },
-        //   }
-        // );
-        res.status(200).json({
-          status: "success",
-          message: "otp sent to email",
-        });
-      } catch (err) {
-        console.log(err);
-        // user.passwordResetToken = undefined;
-        // user.passwordResetExpres = undefined;
-        // await user.save({ validateBeforesave: false });
-        return next(
-          new AppError("There was an error sending the email .try again later !")
-        );
-      }
-    })
+// router.post(
+//     "/login",
+//     async (req, res, next) => {
+//       const user = connection.query(`insert into empdetail (email) value(?) `,
+//         [req.body.email]
+//       )
+//       if (!user) {
+//         return next(new AppError("there is no user with email address", 200));
+//       }
+//       var otp = Math.floor(100000 + Math.random() * 900000);
+//       console.log(otp);
+//       //    const resetToken = createPasswordResetToken(otp);
+//       //await user.save({ validateBeforeSave: false });
+//       const message = `<p> we have received a request to have your password reset for <b>KOOKY ACCOUNT</b>.
+//       if you did not make this request ,plese ignore this email.<br>
+//       <br> To reset your password,plese <a href = "#"><b>visit the link</b></a> </p> <hr>
+//       <h3><b> Having trouble?</b></h3>
+//       <p>if the above link does not work try copying this link into your browser.</p>
+//       <p>${otp}</p></hr>
+//       <h3><b> Question ?<b></h3>
+//       <p>plese let us know if there's anything we can help you with by replying to this email or by emailing <b>Kooky.com</b></p>`;
+//       try {
+//         await sendmail({
+//           email: user.email,
+//           subject: `Hi,${user.name},here's how to reset your password.(valid for 10 mins)`,
+//           message,
+//         });
+//         // const updateOtp = await Registration.findByIdAndUpdate(
+//         //   { _id: user._id },
+//         //   {
+//         //     $set: {
+//         //       otp: otp,
+//         //     },
+//         //   }
+//         // );
+//         res.status(200).json({
+//           status: "success",
+//           message: "otp sent to email",
+//         });
+//       } catch (err) {
+//         console.log(err);
+//         // user.passwordResetToken = undefined;
+//         // user.passwordResetExpres = undefined;
+//         // await user.save({ validateBeforesave: false });
+//         return next(
+//           new AppError("There was an error sending the email .try again later !")
+//         );
+//       }
+//     })
   
 
 //Create Employee details
