@@ -3,6 +3,7 @@ const bodyParser = require('body-parser');
 const morgan = require('morgan');
 const app = express();
 require('dotenv').config();
+const fileupload = require('express-fileupload');
 
 app.get('/',(req,res)=>{
     res.send('Hello world');
@@ -10,8 +11,10 @@ app.get('/',(req,res)=>{
 
 //use middleware
 app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({extended:false}));
+app.use(bodyParser.urlencoded({extended:true}));
 app.use(morgan());
+app.use(fileupload());
+
 
 //import router
 const employeeRouter = require('./routers/employee');
