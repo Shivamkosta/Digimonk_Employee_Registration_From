@@ -8,214 +8,175 @@ const expressJwt = require("express-jwt"); // for authorization check
 
 
 router.post("/login", (req, res) => {
-    var e = req.body.email;
-    console.log(e);
-    connection.query(
-      "SELECT * from joining WHERE email=?",
-      [req.body.email],
-      (err, rows) => {
-        if (err) {
-          console.log(err);
-        }
-        console.log(rows, rows.length);
-        if (rows.length > 0) {
-          console.log(" existing user");
-          var otp = Math.floor(100000 + Math.random() * 900000);
-          console.log(otp);
-          connection.query("UPDATE joining SET otp =? WHERE email=?", [otp,req.body.email],(err, results) => {
-            console.log(results)
-          })
-  
-          //    var mail = connection.query(
-          //     "insert into joining(email) value(?)",
-          //     [
-  
-          //         req.body.email,
-  
-          //     ],(err,user)=>{
-          //         console.log("mail :",mail);
-          //     if(err) {
-          //             res.status(400).json({
-          //                 error : 'Email not found'
-          //             })
-          //         }
-  
-          //generate a signed token with user email with secret
-          const token = jwt.sign(req.body.email, process.env.JWT_TOKEN);
-          console.log("generate token :", token);
-  
-          //save token in cookies
-          res.cookie("token", token, { expire: new Date() + 9999 });
-  
-          //return response with user and token to frontend client
-          // const {
-          //   firstname,
-          //   lastname,
-          //   dob,
-          //   email,
-          //   gender,
-          //   matrimony,
-          //   mobileno,
-          //   dateofjoining,
-          //   presentaddress,
-          //   permanentaddress,
-          //   PF,
-          //   emergencyname,
-          //   relation,
-          //   emergencycontact,
-          //   emergencyaddress,
-          // } = user;
-          //console.log("id :",id)
-          // console.log("fname :", firstname);
-          // console.log("lname :", lastname);
-          // console.log("dob :", dob);
-          // console.log("email :", email);
-          // console.log("gender :", gender);
-          // console.log("matrimony :", matrimony);
-          // console.log("mobileno :", mobileno);
-          // console.log("datofjoining :", dateofjoining);
-          // console.log("presentaddress :", presentaddress);
-          // console.log("permanentaddress :", permanentaddress);
-          // console.log("PF :", PF);
-          // console.log("emergencyname :", emergencyname);
-          // console.log("relation :", relation);
-          // console.log("emergencycontact :", emergencycontact);
-          // console.log("emergencyaddress :", emergencyaddress);
-  
-          res.json({
-            token,
-            otp,
-            data: rows[0],
-            // user: {
-            //   firstname,
-            //   lastname,
-            //   dob,
-            //   email,
-            //   gender,
-            //   matrimony,
-            //   dateofjoining,
-            //   presentaddress,
-            //   permanentaddress,
-            //   PF,
-            //   emergencyname,
-            //   relation,
-            //   emergencycontact,
-            //   emergencyaddress,
-            // },
-          });
-  
-          const transporter = nodemailer.createTransport({
-            host: "smtp.gmail.com",
-            port: 587,
-            secure: false,
-            service: "gmail",
-            auth: {
-              user: "shivamkosti570@gmail.com",
-              pass: "008602750983",
-            },
-          });
-  
-          var mailOption = {
-            from: "shivamkosti570@gmail.com",
-            to: req.body.email,
-            // mail,
-            subject: "send mail",
-            html: `<p> we have received a request to have your password reset for <b>KOOKY ACCOUNT</b>.
-          if you did not make this request ,plese ignore this email.<br>
-          <br> To reset your password,plese <a href = "#"><b>visit the link</b></a> </p> <hr>
-          <h3><b> Having trouble?</b></h3>
-          <p>if the above link does not work try copying this link into your browser.</p>
-          <p>${otp}</p></hr>
-          <h3><b> Question ?<b></h3>
-          <p>plese let us know if there's anything we can help you with by replying to this email or by emailing <b>Kooky.com</b></p>`,
-          };
-  
-          transporter.sendMail(mailOption, function (err, info) {
-            if (err) {
-              console.log(err);
-            } else {
-              console.log("Email Sent successfully :" + info.response);
-            }
-          });
-        } else {
-          console.log("new user");
-          let otp = Math.floor(100000 + Math.random() * 900000);
-          console.log(otp);
-        
-         connection.query(
-            "insert into joining(email) value(?)",
-            [req.body.email],
-            (err, user) => {
-              
-              console.log("mail :", mail);
-              if (err) {
-                res.status(400).json({
-                  error: "Email not found",
-                });
-                connection.query("UPDATE joining SET otp =? WHERE email=?", [otp,req.body.email],(err, results) => {
-                  console.log(results);
-                })
-              }
-  
-              //generate a signed token with user email with secret
-              const token = jwt.sign(req.body.email, process.env.JWT_TOKEN);
-              console.log("generate token :", token);
-  
-              //save token in cookies
-              res.cookie("token", token, { expire: new Date() + 9999 });       
-              const transporter = nodemailer.createTransport({
-                host: "smtp.gmail.com",
-                port: 587,
-                secure: false,
-                service: "gmail",
-                auth: {
-                  user: "shivamkosti570@gmail.com",
-                  pass: "008602750983",
-                },
-              });
-  
-              let mailOption = {
-                from: "shivamkosti570@gmail.com",
-                to: e,
-  
-                subject: "send mail",
-                html: `<p> we have received a request to have your password reset for <b>KOOKY ACCOUNT</b>.
-          if you did not make this request ,plese ignore this email.<br>
-          <br> To reset your password,plese <a href = "#"><b>visit the link</b></a> </p> <hr>
-          <h3><b> Having trouble?</b></h3>
-          <p>if the above link does not work try copying this link into your browser.</p>
-          <p>${otp}</p></hr>
-          <h3><b> Question ?<b></h3>
-          <p>plese let us know if there's anything we can help you with by replying to this email or by emailing <b>Kooky.com</b></p>`,
-              };
-  
-              transporter.sendMail(mailOption, function (err, info) {
-                if (err) {
-                  console.log(err);
-                } else {
-                  console.log("Email Sent successfully :" + info.response);
-                }
-              });
-  
-              res.status(200).json({
-                status:"success",
-                token,
-                otp,
-  
-              });
-  
-           
-            }
-          );
-        }
+  var e = req.body.email;
+  console.log(e);
+  connection.query(
+    "SELECT * from joining WHERE email=?",
+    [req.body.email],
+    (err, rows) => {
+      if (err) {
+        console.log(err);
       }
-    );
-    //     if() {
-  
-    //     } else {
-    //
-  });
-  
+      console.log(rows, rows.length);
+      if (rows.length > 0) {
+        console.log(" existing user");
+        var otp = Math.floor(100000 + Math.random() * 900000);
+        console.log(otp);
+        connection.query("UPDATE joining SET otp =? WHERE email=?", [otp,req.body.email],(err, results) => {
+          console.log(results)
+        })
+
+       
+        //generate a signed token with user email with secret
+        const token = jwt.sign(req.body.email, process.env.JWT_TOKEN);
+        console.log("generate token :", token);
+
+        //save token in cookies
+        res.cookie("token", token, { expire: new Date() + 9999 });
+
+       
+        res.json({
+          token,
+          otp,
+          data: rows[0],
+          
+        });
+
+        const transporter = nodemailer.createTransport({
+          host: "smtp.gmail.com",
+          port: 587,
+          secure: false,
+          service: "gmail",
+          auth: {
+            user: "shivamkosti570@gmail.com",
+            pass: "008602750983",
+          },
+        });
+
+        var mailOption = {
+          from: "shivamkosti570@gmail.com",
+          to: req.body.email,
+          // mail,
+          subject: "send mail",
+          html: `<p> we have received a request to have your password reset for <b>KOOKY ACCOUNT</b>.
+        if you did not make this request ,plese ignore this email.<br>
+        <br> To reset your password,plese <a href = "#"><b>visit the link</b></a> </p> <hr>
+        <h3><b> Having trouble?</b></h3>
+        <p>if the above link does not work try copying this link into your browser.</p>
+        <p>${otp}</p></hr>
+        <h3><b> Question ?<b></h3>
+        <p>plese let us know if there's anything we can help you with by replying to this email or by emailing <b>Kooky.com</b></p>`,
+        };
+
+        transporter.sendMail(mailOption, function (err, info) {
+          if (err) {
+            console.log(err);
+          } else {
+            console.log("Email Sent successfully :" + info.response);
+          }
+        });
+      } else {
+        console.log("new user");
+        let otp = Math.floor(100000 + Math.random() * 900000);
+        console.log(otp);
+      
+       connection.query(
+          "insert into joining(email) value(?)",
+          [req.body.email],
+          (err, user) => {
+            
+            // console.log("mail :", mail);
+            if (err) {
+              res.status(400).json({
+                error: "Email not found",
+              });
+              connection.query("UPDATE joining SET otp =? WHERE email=?", [otp,req.body.email],(err, results) => {
+                console.log(results);
+              })
+            }
+
+            //generate a signed token with user email with secret
+            const token = jwt.sign(req.body.email, process.env.JWT_TOKEN);
+            console.log("generate token :", token);
+
+            //save token in cookies
+            res.cookie("token", token, { expire: new Date() + 9999 });       
+            const transporter = nodemailer.createTransport({
+              host: "smtp.gmail.com",
+              port: 587,
+              secure: false,
+              service: "gmail",
+              auth: {
+                user: "shivamkosti570@gmail.com",
+                pass: "008602750983",
+              },
+            });
+
+            let mailOption = {
+              from: "shivamkosti570@gmail.com",
+              to: e,
+
+              subject: "send mail",
+              html: `<p> we have received a request to have your password reset for <b>KOOKY ACCOUNT</b>.
+        if you did not make this request ,plese ignore this email.<br>
+        <br> To reset your password,plese <a href = "#"><b>visit the link</b></a> </p> <hr>
+        <h3><b> Having trouble?</b></h3>
+        <p>if the above link does not work try copying this link into your browser.</p>
+        <p>${otp}</p></hr>
+        <h3><b> Question ?<b></h3>
+        <p>plese let us know if there's anything we can help you with by replying to this email or by emailing <b>Kooky.com</b></p>`,
+            };
+
+            transporter.sendMail(mailOption, function (err, info) {
+              if (err) {
+                console.log(err);
+              } else {
+                console.log("Email Sent successfully :" + info.response);
+              }
+            });
+
+            res.status(200).json({
+              status:"success",
+              token,
+              otp,
+
+            });
+
+         
+          }
+        );
+      }
+    }
+  );
+  //     if() {
+
+  //     } else {
+  //
+});
+
+//verification 
+router.post("/verification",(req,res)=>{
+    
+    connection.query("SELECT * from joining WHERE email=?",
+    [req.body.email],(err,rows)=>{
+        // console.log(rows);
+        // console.log("length :",rows.length)
+        console.log(rows[0].otp)
+        // console.log(rows[0].otp)
+        if(rows && rows[0].otp == req.body.otp ){
+            console.log("true")
+            res.status(200).json({status:"You have successfully verified"})
+        }else{
+            res.status(400).json({status:"failur",message:"Incorrect otp please enter your correct otp"})
+        }
+        
+        
+       
+        
+       
+    })
+})
+
 router.post('/email/',(req,res)=>{
      var e = req.body.email;
      console.log(e);
