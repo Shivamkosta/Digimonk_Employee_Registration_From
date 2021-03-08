@@ -4,7 +4,7 @@ const connection = mysql.createConnection({
     port:3306,
     user:'root',
     password:'',
-    database:'employeeapp',
+    database:'digimonk',
     connectionLimit:100,
     multipleStatements:true
 });
