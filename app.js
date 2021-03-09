@@ -9,6 +9,7 @@ app.get('/',(req,res)=>{
     res.send('Hello world');
 })
 
+
 //use middleware
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({extended:true}));
