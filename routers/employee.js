@@ -6,6 +6,10 @@ const nodemailer = require('nodemailer');
 const jwt = require("jsonwebtoken"); // to generate signed token
 const expressJwt = require("express-jwt"); // for authorization check
 const verifyToken = require('../auth/auth');
+const fs = require('fs');
+const mime = require('mime');
+const { match } = require('assert');
+const { response } = require('express');
 
 router.post("/login", (req, res) => {
   var e = req.body.email;
@@ -260,37 +264,69 @@ router.get('/get/employee',verifyToken,(req,res,next)=>{
 })
 
 //Read single data
-router.get('/get/read/:id',verifyToken,(req,res)=>{
-    console.log(req.params.id);
-    //sql query
-    let sql = `SELECT * FROM joining WHERE id = ${req.params.id} `;
+// router.get('/get/read/:id',verifyToken,(req,res)=>{
+//     console.log(req.params.id);
+//     //sql query
+//     let sql = `SELECT * FROM joining WHERE id = ${req.params.id} `;
 
-    //run query
-    connection.query(sql,(err,result)=>{
-        if(err) throw err;
-        res.json({SUCCESS:true,result});
-        console.log("result :",result);
+//     //run query
+//     connection.query(sql,(err,result)=>{
+//         if(err) throw err;
+//         res.json({SUCCESS:true,result});
+//         console.log("result :",result);
+//     })
+// })
+
+router.get('/get/read',(req,res)=>{
+  let token = req.headers["x-access-token"];
+    var splitToken = token.split(' ')[1];
+    console.log("token :", splitToken);
+
+    if (!token) {
+        return res.status(403).send({
+            message: "No token provided!"
+        });
+    }
+
+    jwt.verify(splitToken, process.env.JWT_TOKEN, (err, rows) => {
+        rows;
+        console.log("rows :", rows)
+
+        if (err) {
+            console.log("error :", err);
+            return res.status(401).send({
+                message: "Unauthorized!"
+            });
+        }      
+        connection.query("SELECT * from joining WHERE email=[rows] ",(err,response)=>{
+            if(err) {
+                console.log("error :",err);
+                res.status(400).json({status:false})
+            }else{
+                res.status(201).json({status:true})
+                console.log("response :",response)
+            }
+        })
     })
 })
 
 //upload file
 router.post('/upload',upload.any(),(req,res,next)=>{
-    console.log(req.body);
+    console.log("req.body :",req.body);
     connection.query(
-        "insert into joining(photo,highschool,highersecondry,graduation,postgraduation) values(?,?,?,?,?)",
+        "insert into joining(photo) value(?)",
         [            
             req.body.photo,
-            req.body.highschool,
-            req.body.highersecondry,
-            req.body.graduation,
-            req.body.postgraduation       
+                  
 
         ],
         (err,result)=>{
+          console.log("error :",err);
+          console.log("result :",result);
             if(err){
+              
                 
                 res.status(404).json({SUCCESS:false})
-                console.log(err)
             }else{
                 res.status(200).json({SUCCESS:true});
                 console.log(result)
@@ -299,7 +335,56 @@ router.post('/upload',upload.any(),(req,res,next)=>{
     )
 });
 
+const uploadImage =  (req, res, next) => {
+  // to declare some path to store your converted image
+  const matches = req.body.photo.match(/^data:([A-Za-z-+\/]+);base64,(.+)$/);
+  console.log("matches :",matches);
+  const response = {};
+  console.log("response :",response);
+   
+  if (matches.length !== 3) {
+  return new Error('Invalid input string');
+  }
+   
+  response.type = matches[1];
+  response.data = new Buffer(matches, 'base64');
+  let decodedImg = response;
+  let imageBuffer = decodedImg.data;
+  let type = decodedImg.type;
+  let extension = mime.extension(type);
+  let fileName = "image." + extension;
+  try {
+  fs.writeFileSync("./images/" + fileName, imageBuffer, 'utf-8');
+  return res.send({"status":"success"});
+  } catch (e) {
+  next(e);
+  }
+  }
 
+  
+  router.post('/upload/image',uploadImage ,(req,res)=>{
+    console.log("req.body :",req.body);
+    connection.query(
+        "insert into joining(photo) value(?)",
+        [            
+            req.body.photo,
+                  
+
+        ],
+        (err,result)=>{
+          console.log("error :",err);
+          console.log("result :",result);
+            if(err){
+              
+                
+                res.status(404).json({SUCCESS:false})
+            }else{
+                res.status(200).json({SUCCESS:true});
+                console.log(result)
+            }
+        }
+    )
+  });
 
 //UPDATE Employee Details
 router.put('/update/empdetails/:id',(req,res,next)=>{
