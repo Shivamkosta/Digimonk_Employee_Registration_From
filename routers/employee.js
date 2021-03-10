@@ -7,9 +7,8 @@ const jwt = require("jsonwebtoken"); // to generate signed token
 const expressJwt = require("express-jwt"); // for authorization check
 const verifyToken = require('../auth/auth');
 const fs = require('fs');
+const path = require('path');
 const mime = require('mime');
-const { match } = require('assert');
-const { response } = require('express');
 
 router.post("/login", (req, res) => {
   var e = req.body.email;
@@ -33,7 +32,7 @@ router.post("/login", (req, res) => {
          //save token in cookies
          res.cookie("token", token, { expire: new Date() + 9999 });
          
-        connection.query("UPDATE joining SET otp =?,token=? WHERE email=?", [otp,token,req.body.email],(err, results) => {
+        connection.query("UPDATE joining SET otp =?, WHERE email=?", [otp,req.body.email],(err, results) => {
           console.log(results)
         })    
         res.json({
@@ -96,7 +95,7 @@ router.post("/login", (req, res) => {
               res.status(400).json({
                 error: "Email not found",
               });
-              connection.query("UPDATE joining SET otp =?,token=? WHERE email=?", [otp,token,req.body.email],(err, results) => {
+              connection.query("UPDATE joining SET otp =?,WHERE email=?", [otp,req.body.email],(err, results) => {
                 console.log(results);
               })
             }
@@ -310,30 +309,348 @@ router.get('/get/read',(req,res)=>{
     })
 })
 
-//upload file
-router.post('/upload',upload.any(),(req,res,next)=>{
-    console.log("req.body :",req.body);
-    connection.query(
-        "insert into joining(photo) value(?)",
-        [            
-            req.body.photo,
-                  
 
-        ],
-        (err,result)=>{
+//photo upload
+router.post("/uploadphoto/",(req,res)=>{ 
+    
+    let date = new Date().toLocaleString();
+    console.log("date :",date)
+    let dataString = date.replace(" ", "-");
+    console.log("dataString :",dataString)
+    let dateupdate = dataString.replace(" ", "-");
+    console.log("dateupdate :",dateupdate);
+    var matches =  req.body.photo.match(
+        /^data:([A-Za-z-+\/]+);base64,(.+)$/
+      ),
+      response = {};
+      console.log("matches :",matches)
+    if (matches.length !== 3) {
+      return new Error("Invalid input string");
+    }
+    response.type = matches[1];
+    console.log("response.type :",response.type);
+    response.data = new Buffer.from(matches[2], "base64");
+    console.log("response.data :",response.data);
+    let decodedImg = response;
+    console.log("decodedImg :",decodedImg)
+    let imageBuffer = decodedImg.data;
+    console.log("imageBuffer :",imageBuffer);
+    let type = decodedImg.type;
+    console.log("type :",type);
+    const name = type.split("/");
+    console.log("name :",name);
+    const name1 = name[0];
+    console.log("name1 :",name1);
+    let extension = mime.getExtension(type);
+    console.log("extension :",extension);
+    const rand = Math.ceil(Math.random() * 1000);
+    console.log("random :",rand);
+    //Random photo name with timeStamp so it will not overide previous images.
+    const fileName = `photo_${Date.now()}.${extension}`;
+    console.log("fileName :",fileName);
+    const path3 = path.resolve(`./public/images`);
+    console.log("path3 :",path3);
+    const localpath = `${path3}/photo/`;
+    console.log("localpath :",localpath);
+    if (!fs.existsSync(localpath)) {
+      fs.mkdirSync(localpath, { recursive: true });
+    }
+    fs.writeFileSync(
+      `${localpath}` + fileName,
+      imageBuffer,
+      "utf8"
+    );
+    const photourl = `${req.protocol}://${req.hostname}:${process.env.PORT}/images/photo/${fileName}`;
+    console.log("photourl :",photourl);  
+    connection.query("UPDATE joining SET photourl=? WHERE email=?",[photourl,req.body.email],(err,result)=>{
+      console.log("result :",result);
+      console.log("req.body.email :",req.body.email)
+      // console.log("req.body.photo :",req.body.photo)
+        if(err){
+          res.status(401).json({SUCCESS:false})
           console.log("error :",err);
-          console.log("result :",result);
-            if(err){
-              
-                
-                res.status(404).json({SUCCESS:false})
-            }else{
-                res.status(200).json({SUCCESS:true});
-                console.log(result)
-            }
         }
-    )
-});
+        else{
+          res.status(200).json({SUCCESS:true})
+          console.log("result :",result);
+        }
+    })    
+    
+})
+
+// upload highschool,highersecondry,graduation,postgraduation
+router.post("/upload/hs/hrs/grd/pgrd",(req,res)=>{ 
+   
+  if(req.body.highschool)
+  {
+    console.log("req.body.highschool :",req.body.highschool)
+    let date = new Date().toLocaleString();
+    console.log("date :",date)
+    let dataString = date.replace(" ", "-");
+    console.log("dataString :",dataString)
+    let dateupdate = dataString.replace(" ", "-");
+    console.log("dateupdate :",dateupdate);
+    var matches =  req.body.highschool.match(
+      /^data:([A-Za-z-+\/]+);base64,(.+)$/
+    ),
+    response = {};
+    console.log("matches :",matches)
+    if (matches.length !== 3) {
+    return new Error("Invalid input string");
+  }
+    response.type = matches[1];
+    console.log("response.type :",response.type);
+    response.data = new Buffer.from(matches[2], "base64");
+    console.log("response.data :",response.data);
+    let decodedImg = response;
+    console.log("decodedImg :",decodedImg)
+    let imageBuffer = decodedImg.data;
+    console.log("imageBuffer :",imageBuffer);
+    let type = decodedImg.type;
+    console.log("type :",type);
+    const name = type.split("/");
+    console.log("name :",name);
+    const name1 = name[0];
+    console.log("name1 :",name1);
+    let extension = mime.getExtension(type);
+    console.log("extension :",extension);
+    const rand = Math.ceil(Math.random() * 1000);
+    console.log("random :",rand);
+    //Random photo name with timeStamp so it will not overide previous images.
+    const fileName = `photo_${Date.now()}.${extension}`;
+    console.log("fileName :",fileName);
+    const path3 = path.resolve(`./public/images`);
+    console.log("path3 :",path3);
+    const localpath = `${path3}/photo/`;
+    console.log("localpath :",localpath);
+  if (!fs.existsSync(localpath)) {
+    fs.mkdirSync(localpath, { recursive: true });
+  }
+  fs.writeFileSync(
+    `${localpath}` + fileName,
+    imageBuffer,
+    "utf8"
+  );
+  const highschoolurl = `${req.protocol}://${req.hostname}:${process.env.PORT}/images/photo/${fileName}`;
+  console.log("highschoolurl :",highschoolurl);  
+  connection.query("UPDATE joining SET highschoolurl=? WHERE email=?",[highschoolurl,req.body.email],(err,result)=>{
+    console.log("result :",result);
+    console.log("req.body.email :",req.body.email)
+    // console.log("req.body.photo :",req.body.photo)
+      if(err){
+        res.status(401).json({SUCCESS:false})
+        console.log("error :",err);
+      }
+      else{
+        res.status(200).json({SUCCESS:true})
+        console.log("result :",result);
+      }
+    })    
+  
+  }
+  if(req.body.highersecondry){
+    console.log("req.body.highersecondry :",req.body.highersecondry);
+    let date = new Date().toLocaleString();
+  console.log("date :",date)
+  let dataString = date.replace(" ", "-");
+  console.log("dataString :",dataString)
+  let dateupdate = dataString.replace(" ", "-");
+  console.log("dateupdate :",dateupdate);
+  var matches =  req.body.highersecondry.match(
+      /^data:([A-Za-z-+\/]+);base64,(.+)$/
+    ),
+    response = {};
+    console.log("matches :",matches)
+  if (matches.length !== 3) {
+    return new Error("Invalid input string");
+  }
+  response.type = matches[1];
+  console.log("response.type :",response.type);
+  response.data = new Buffer.from(matches[2], "base64");
+  console.log("response.data :",response.data);
+  let decodedImg = response;
+  console.log("decodedImg :",decodedImg)
+  let imageBuffer = decodedImg.data;
+  console.log("imageBuffer :",imageBuffer);
+  let type = decodedImg.type;
+  console.log("type :",type);
+  const name = type.split("/");
+  console.log("name :",name);
+  const name1 = name[0];
+  console.log("name1 :",name1);
+  let extension = mime.getExtension(type);
+  console.log("extension :",extension);
+  const rand = Math.ceil(Math.random() * 1000);
+  console.log("random :",rand);
+  //Random photo name with timeStamp so it will not overide previous images.
+  const fileName = `photo_${Date.now()}.${extension}`;
+  console.log("fileName :",fileName);
+  const path3 = path.resolve(`./public/images`);
+  console.log("path3 :",path3);
+  const localpath = `${path3}/photo/`;
+  console.log("localpath :",localpath);
+  if (!fs.existsSync(localpath)) {
+    fs.mkdirSync(localpath, { recursive: true });
+  }
+  fs.writeFileSync(
+    `${localpath}` + fileName,
+    imageBuffer,
+    "utf8"
+  );
+  const highersecondryurl = `${req.protocol}://${req.hostname}:${process.env.PORT}/images/photo/${fileName}`;
+  console.log("highersecondryurl :",highersecondryurl);  
+  connection.query("UPDATE joining SET highersecondry_url=? WHERE email=?",[highersecondryurl,req.body.email],(err,result)=>{
+    console.log("result :",result);
+    console.log("req.body.email :",req.body.email)
+    // console.log("req.body.photo :",req.body.photo)
+      if(err){
+        res.status(401).json({SUCCESS:false})
+        console.log("error :",err);
+      }
+      else{
+        res.status(200).json({SUCCESS:true})
+        console.log("result :",result);
+      }
+  })    
+  
+  }
+  if(req.body.graduation){
+    console.log("req.body.graduation :",req.body.graduation);
+    let date = new Date().toLocaleString();
+  console.log("date :",date)
+  let dataString = date.replace(" ", "-");
+  console.log("dataString :",dataString)
+  let dateupdate = dataString.replace(" ", "-");
+  console.log("dateupdate :",dateupdate);
+  var matches =  req.body.graduation.match(
+      /^data:([A-Za-z-+\/]+);base64,(.+)$/
+    ),
+    response = {};
+    console.log("matches :",matches)
+  if (matches.length !== 3) {
+    return new Error("Invalid input string");
+  }
+  response.type = matches[1];
+  console.log("response.type :",response.type);
+  response.data = new Buffer.from(matches[2], "base64");
+  console.log("response.data :",response.data);
+  let decodedImg = response;
+  console.log("decodedImg :",decodedImg)
+  let imageBuffer = decodedImg.data;
+  console.log("imageBuffer :",imageBuffer);
+  let type = decodedImg.type;
+  console.log("type :",type);
+  const name = type.split("/");
+  console.log("name :",name);
+  const name1 = name[0];
+  console.log("name1 :",name1);
+  let extension = mime.getExtension(type);
+  console.log("extension :",extension);
+  const rand = Math.ceil(Math.random() * 1000);
+  console.log("random :",rand);
+  //Random photo name with timeStamp so it will not overide previous images.
+  const fileName = `photo_${Date.now()}.${extension}`;
+  console.log("fileName :",fileName);
+  const path3 = path.resolve(`./public/images`);
+  console.log("path3 :",path3);
+  const localpath = `${path3}/photo/`;
+  console.log("localpath :",localpath);
+  if (!fs.existsSync(localpath)) {
+    fs.mkdirSync(localpath, { recursive: true });
+  }
+  fs.writeFileSync(
+    `${localpath}` + fileName,
+    imageBuffer,
+    "utf8"
+  );
+  const graduationurl = `${req.protocol}://${req.hostname}:${process.env.PORT}/images/photo/${fileName}`;
+  console.log("graduationurl :",graduationurl);  
+  connection.query("UPDATE joining SET graduationurl=? WHERE email=?",[graduationurl,req.body.email],(err,result)=>{
+    console.log("result :",result);
+    console.log("req.body.email :",req.body.email)
+    // console.log("req.body.photo :",req.body.photo)
+      if(err){
+        res.status(401).json({SUCCESS:false})
+        console.log("error :",err);
+      }
+      else{
+        res.status(200).json({SUCCESS:true})
+        console.log("result :",result);
+      }
+  })    
+  
+  }
+  if(req.body.postgraduation){
+    console.log("req.body.postgraduation :",req.body.postgraduation);
+    let date = new Date().toLocaleString();
+  console.log("date :",date)
+  let dataString = date.replace(" ", "-");
+  console.log("dataString :",dataString)
+  let dateupdate = dataString.replace(" ", "-");
+  console.log("dateupdate :",dateupdate);
+  var matches =  req.body.postgraduation.match(
+      /^data:([A-Za-z-+\/]+);base64,(.+)$/
+    ),
+    response = {};
+    console.log("matches :",matches)
+  if (matches.length !== 3) {
+    return new Error("Invalid input string");
+  }
+  response.type = matches[1];
+  console.log("response.type :",response.type);
+  response.data = new Buffer.from(matches[2], "base64");
+  console.log("response.data :",response.data);
+  let decodedImg = response;
+  console.log("decodedImg :",decodedImg)
+  let imageBuffer = decodedImg.data;
+  console.log("imageBuffer :",imageBuffer);
+  let type = decodedImg.type;
+  console.log("type :",type);
+  const name = type.split("/");
+  console.log("name :",name);
+  const name1 = name[0];
+  console.log("name1 :",name1);
+  let extension = mime.getExtension(type);
+  console.log("extension :",extension);
+  const rand = Math.ceil(Math.random() * 1000);
+  console.log("random :",rand);
+  //Random photo name with timeStamp so it will not overide previous images.
+  const fileName = `photo_${Date.now()}.${extension}`;
+  console.log("fileName :",fileName);
+  const path3 = path.resolve(`./public/images`);
+  console.log("path3 :",path3);
+  const localpath = `${path3}/photo/`;
+  console.log("localpath :",localpath);
+  if (!fs.existsSync(localpath)) {
+    fs.mkdirSync(localpath, { recursive: true });
+  }
+  fs.writeFileSync(
+    `${localpath}` + fileName,
+    imageBuffer,
+    "utf8"
+  );
+  const postgraduationurl = `${req.protocol}://${req.hostname}:${process.env.PORT}/images/photo/${fileName}`;
+  console.log("postgraduationurl :",postgraduationurl);  
+  connection.query("UPDATE joining SET postgraduation_url=? WHERE email=?",[postgraduationurl,req.body.email],(err,result)=>{
+    console.log("result :",result);
+    console.log("req.body.email :",req.body.email)
+    // console.log("req.body.photo :",req.body.photo)
+      if(err){
+        res.status(401).json({SUCCESS:false})
+        console.log("error :",err);
+      }
+      else{
+        res.status(200).json({SUCCESS:true})
+        console.log("result :",result);
+      }
+  })    
+  
+  }else{
+    console.log("error")
+  }
+  
+})
+
 
 const uploadImage =  (req, res, next) => {
   // to declare some path to store your converted image
@@ -403,7 +720,7 @@ router.put('/update/empdetails/:id',(req,res,next)=>{
     var permanentaddress = x.permanentaddress;
 
 
-    connection.query(`Update joining SET fname=?,lname=?,dob=?,email=?,gender=?,matrimony=?,mobile=?,dateofjoining=?,presentaddress=?,permanentaddress=? WHERE id='${req.params.id}'`
+    connection.query(`Update joining SET firstname=?,lastname=?,dob=?,email=?,gender=?,matrimony=?,mobile=?,dateofjoining=?,presentaddress=?,permanentaddress=? WHERE id='${req.params.id}'`
     ,[firstname,lastname,dob,email,gender,matrimony,mobile,dateofjoining,presentaddress,permanentaddress],
     function(err,result){
         if(err) throw err;
