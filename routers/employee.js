@@ -298,7 +298,7 @@ router.get('/get/read',(req,res)=>{
                 message: "Unauthorized!"
             });
         }      
-        connection.query("SELECT * from joining WHERE email=[rows] ",(err,response)=>{
+        connection.query("SELECT * from joining WHERE email=? ",[rows],(err,response)=>{
             if(err) {
                 console.log("error :",err);
                 res.status(400).json({status:false})
