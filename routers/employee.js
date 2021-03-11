@@ -251,16 +251,36 @@ router.post('/email/', (req, res) => {
 })
 
 // GET ALL DATA
-router.get('/getall/employee', (req, res, next) => {
-  console.log('get api is running');
-  res.writeHead(200, { 'Content-Type': 'text/json' });
-  connection.query('Select * from joining', (err, result) => {
-    if (err) throw err;
-    res.write(JSON.stringify(result));
+router.get('/getall/employee', (req, res) => {
+  if (req.body.role === "user") {
+    console.log("user");
+    return res.status(403).json({
+      error: "Admin resourse! Access denied"
+    });
+  } else {
+    // res.writeHead(200, { 'Content-Type': 'text/json' });
+    connection.query('Select * from joining', (err, result) => {
+      if (err) {
+        res.status(403).json({
+          status: false
+        })
+        console.log("error :", err);
+      }
+      res.status(200).json({
+        status: true,
+        message: "welcome to admin dashboard",
+        result
+      })
+      // res.write(JSON.stringify(result));
 
-    console.log(res.write(JSON.stringify(result)))
-    res.end();
-  })
+      // console.log(res.write(JSON.stringify(result)))
+      // res.end();
+
+    })
+
+
+  }
+
 })
 
 //Read single data
@@ -685,88 +705,179 @@ router.post("/upload/hs/hrs/grd/pgrd", (req, res) => {
 //   )
 // });
 
+//CREATE EMPLOYEE
+router.post('/create/employee', (req, res) => {
+  connection.query("INSERT INTO joining (firstname,lastname,dob,email,gender,matrimony,mobileno,dateofjoining,presentaddress,permanentaddress,bankname,ifsc,bankaccountno,PF,emergencyname,emergencycontact,emergencyaddress,relation) values(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
+    [
+      req.body.firstname,
+      req.body.lastname,
+      req.body.dob,
+      req.body.email,
+      req.body.gender,
+      req.body.matrimony,
+      req.body.mobileno,
+      req.body.dateofjoining,
+      req.body.presentaddress,
+      req.body.permanentaddress,
+      req.body.bankname,
+      req.body.ifsc,
+      req.body.bankaccountno,
+      req.body.PF,
+      req.body.emergencyname,
+      req.body.emergencycontact,
+      req.body.emergencyaddress,
+      req.body.relation
+    ], (err, user) => {
+      if (err) {
+        res.status(401).json({
+          status: false
+        });
+        console.log("error :", err);
+      } else {
+        res.status(201).json({
+          status: true
+        });
+        console.log("user :", user);
+      }
+    })
+})
+
 //UPDATE Employee Details
 router.put('/update/empdetails/:id', (req, res, next) => {
-  console.log(req.params.id);
+  console.log("req.params.id :", req.params.id);
 
-  var x = req.body;
-  var firstname = x.firstname;
-  var lastname = x.lastname;
-  var dob = x.dob;
-  var email = x.email;
-  var gender = x.gender;
-  var matrimony = x.matrimony;
-  var mobile = x.mobile;
-  var dateofjoining = x.dateofjoining;
-  var presentaddress = x.presentaddress;
-  var permanentaddress = x.permanentaddress;
-  var bankname = x.bankname;
-  var ifsc = x.ifsc;
-  var bankaccount = x.bankaccount;
-  var PF = x.PF;
-  var emergencyname = x.emergencyname;
-  var emergencycontact = x.emergencycontact;
-  var emergencyaddress = x.emergencyaddress;
-  var relation = x.relation;
-  var photourl = x.photourl;
-  var highschoolurl = x.highschoolurl;
-  var highersecondryurl = x.highersecondryurl;
-  var graduationurl = x.graduationurl;
-  var postgraduationurl = x.postgraduationurl;
+  if (req.body.role === "user") {
+    console.log("user");
+    return res.status(403).json({
+      error: "Admin resourse! Access denied"
+    });
+  } else {
+    var x = req.body;
+    var firstname = x.firstname;
+    var lastname = x.lastname;
+    var dob = x.dob;
+    var email = x.email;
+    var gender = x.gender;
+    var matrimony = x.matrimony;
+    var mobileno = x.mobileno;
+    var dateofjoining = x.dateofjoining;
+    var presentaddress = x.presentaddress;
+    var permanentaddress = x.permanentaddress;
+    var photourl = x.photourl;
+    // var highschoolurl = x.highschoolurl;
+    // var highersecondryurl = x.highersecondryurl;
+    // var graduationurl = x.graduationurl;
+    // var postgraduationurl = x.postgraduationurl;
 
 
-  connection.query(`Update joining SET firstname=?,lastname=?,dob=?,email=?,gender=?,matrimony=?,mobile=?,dateofjoining=?,presentaddress=?,permanentaddress=?,bankname=?,ifsc=?,bankaccount=?,PF=?,emergencyname=?,emergencycontact=?,emergencyaddress=?,relation=?,photourl=?,highschoolurl=?,highersecondryurl=?,graduationurl=?,postgraduation=? WHERE id='${req.params.id}'`
-    , [firstname, lastname, dob, email, gender, matrimony, mobile, dateofjoining, presentaddress, permanentaddress, bankname, bankaccount, ifsc, PF, emergencyname, emergencycontact, emergencyaddress, relation, photourl, highschoolurl, highersecondryurl, graduationurl, postgraduationurl],
-    function (err, result) {
-      if (err) throw err;
-      res.json({ status: true, message: 'User has been updated successfully', id: req.params.id })
-      console.log("result :", result);
-    })
+    connection.query(`Update joining SET firstname=?,lastname=?,dob=?,email=?,gender=?,matrimony=?,mobileno=?,dateofjoining=?,presentaddress=?,permanentaddress=?,photourl=? WHERE id='${req.params.id}'`
+      , [firstname, lastname, dob, email, gender, matrimony, mobileno, dateofjoining, presentaddress, permanentaddress, photourl],
+      function (err, result) {
+        if (err){
+          res.status(401).json({
+            status:false
+          });
+          console.log("error :",err);
+        }else{
+          res.status(200).json({
+            status: true,
+            message: "welcome to admin dashboard",
+            response: 'User has been updated successfully',
+            id: req.params.id
+          })
+          console.log("result :", result);
+        }
+        // res.json({ status: true, message: 'User has been updated successfully', id: req.params.id })
+        
+      })
+
+    
+  }
 
 });
 
 //Update bank details
 router.put('/update/bankdetails/:id', (req, res, next) => {
-  console.log(req.params.id);
+  console.log("req.params.id :", req.params.id);
+  if (req.body.role === "user") {
+    console.log("user");
+    return res.status(403).json({
+      error: "Admin resourse! Access denied"
+    });
+  } else {
+    var x = req.body;
+    var bankname = x.bankname;
+    var ifsc = x.ifsccode;
+    var bankaccountno = x.bankaccount;
+    connection.query(`Update joining SET bankname=?,ifsc=?,bankaccountno=? WHERE id='${req.params.id}'`
+      , [bankname, ifsc, bankaccountno],
+      function (err, result) {
+        if (err) {
+          res.status(401).json({
+            status: false
+          })
+          console.log("error :", err);
+        } else {
+          res.status(200).json({
+            status: true,
+            message: "welcome to admin dashboard",
+            response: 'User has been updated successfully'
+          })
+        }
+        // res.json({ status: true, message: 'User has been updated successfully' })
+        console.log("result :", result);
+      })
 
-  var x = req.body;
-  var bankname = x.bankname;
-  var ifsc = x.ifsccode;
-  var bankaccount = x.bankaccount;
+  }
 
-
-  connection.query(`Update joining SET bankname=?,ifsc=?,bankaccount=? WHERE id='${req.params.id}'`
-    , [bankname, ifsc, bankaccount],
-    function (err, result) {
-      if (err) throw err;
-      res.json({ status: true, message: 'User has been updated successfully' })
-      console.log(result)
-    })
 });
 
 //update emergency details
 router.put('/update/emergencydetails/:id', (req, res, next) => {
-  console.log(req.params.id);
+  console.log("req.params.id :", req.params.id);
 
-  var x = req.body;
-  var PF = x.PF;
-  var emergencyname = x.emergencyname;
-  var emergencycontact = x.emergencycontact;
-  var emergencyaddress = x.emergencyaddress;
+  //admin middleware
+  if (req.body.role === "user") {
+    console.log("user");
+    return res.status(403).json({
+      error: "Admin resourse! Access denied"
+    });
+  } else {
+    var x = req.body;
+    var PF = x.PF;
+    var emergencyname = x.emergencyname;
+    var emergencycontact = x.emergencycontact;
+    var emergencyaddress = x.emergencyaddress;
 
 
-  connection.query(`Update joining SET PF=?,emergencyname=?,emergencycontact=?,emergencyaddress=? WHERE id='${req.params.id}'`
-    , [PF, emergencyname, emergencycontact, emergencyaddress],
-    function (err, result) {
-      if (err) throw err;
-      res.json({ status: true, message: 'User has been updated successfully' })
-      console.log(result)
-    })
+    connection.query(`Update joining SET PF=?,emergencyname=?,emergencycontact=?,emergencyaddress=? WHERE id='${req.params.id}'`
+      , [PF, emergencyname, emergencycontact, emergencyaddress],
+      function (err, result) {
+        if (err) {
+          res.status(401).json({
+            status: false
+          });
+          console.log("error :", err);
+        } else {
+          res.status(200).json({
+            status: true,
+            response: "User has been updated successfully",
+            message: "welcome to admin dashboard"
+          })
+        }
+        console.log("result :", result)
+        // res.json({ status: true, message: 'User has been updated successfully' })
+
+      })
+
+  }
+
 })
 
-//delete single data
+//ADMIN delete single data
 router.delete('/delete/empoloyee/:id', (req, res) => {
   console.log("req.params.id :", req.params.id);
+  //admin middleware
   if (req.body.role === 'user') {
     console.log("user");
     res.status(403).json({
