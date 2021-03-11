@@ -1,3 +1,21 @@
+//Admin middleware
+exports.isAdmin = (req, res, next) => {
+    console.log(req.body)
+    if (req.body.role === "user") {
+        console.log("user");
+        return res.status(403).json({
+            error: "Admin resourse! Access denied"
+        });
+    }else{
+        res.status(200).json({
+            status:true,
+            message:"welcome to admin dashboard"
+        })
+    }
+    next();
+};
+
+
 // const jwt = require("jsonwebtoken");
 // const connection = require("../routers/connection");
 
