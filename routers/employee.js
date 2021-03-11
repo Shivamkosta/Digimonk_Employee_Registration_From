@@ -383,7 +383,8 @@ router.post("/upload/hs/hrs/grd/pgrd",(req,res)=>{
    
   if(req.body.highschool)
   {
-    console.log("req.body.highschool :",req.body.highschool)
+    console.log("file1 :");
+    //console.log("req.body.highschool :",req.body.highschool)
     let date = new Date().toLocaleString();
     console.log("date :",date)
     let dataString = date.replace(" ", "-");
@@ -394,8 +395,9 @@ router.post("/upload/hs/hrs/grd/pgrd",(req,res)=>{
       /^data:([A-Za-z-+\/]+);base64,(.+)$/
     ),
     response = {};
-    console.log("matches :",matches)
     if (matches.length !== 3) {
+      console.log("matches.length :",matches.length)
+    
     return new Error("Invalid input string");
   }
     response.type = matches[1];
@@ -432,24 +434,25 @@ router.post("/upload/hs/hrs/grd/pgrd",(req,res)=>{
     "utf8"
   );
   const highschoolurl = `${req.protocol}://${req.hostname}:${process.env.PORT}/images/photo/${fileName}`;
-  console.log("highschoolurl :",highschoolurl);  
+  //console.log("highschoolurl :",highschoolurl);  
   connection.query("UPDATE joining SET highschoolurl=? WHERE email=?",[highschoolurl,req.body.email],(err,result)=>{
     console.log("result :",result);
     console.log("req.body.email :",req.body.email)
     // console.log("req.body.photo :",req.body.photo)
       if(err){
-        res.status(401).json({SUCCESS:false})
+        // res.status(401).send({SUCCESS:false})
         console.log("error :",err);
       }
       else{
-        res.status(200).json({SUCCESS:true})
+        // res.status(200).send({SUCCESS:true})
         console.log("result :",result);
       }
     })    
   
   }
   if(req.body.highersecondry){
-    console.log("req.body.highersecondry :",req.body.highersecondry);
+    console.log("file2:");
+    //console.log("req.body.highersecondry :",req.body.highersecondry);
     let date = new Date().toLocaleString();
   console.log("date :",date)
   let dataString = date.replace(" ", "-");
@@ -460,8 +463,9 @@ router.post("/upload/hs/hrs/grd/pgrd",(req,res)=>{
       /^data:([A-Za-z-+\/]+);base64,(.+)$/
     ),
     response = {};
-    console.log("matches :",matches)
-  if (matches.length !== 3) {
+   if (matches.length !== 3) {
+    // console.log("matches.length :",matches.length);
+  
     return new Error("Invalid input string");
   }
   response.type = matches[1];
@@ -498,24 +502,25 @@ router.post("/upload/hs/hrs/grd/pgrd",(req,res)=>{
     "utf8"
   );
   const highersecondryurl = `${req.protocol}://${req.hostname}:${process.env.PORT}/images/photo/${fileName}`;
-  console.log("highersecondryurl :",highersecondryurl);  
-  connection.query("UPDATE joining SET highersecondry_url=? WHERE email=?",[highersecondryurl,req.body.email],(err,result)=>{
+  //console.log("highersecondryurl :",highersecondryurl);  
+  connection.query("UPDATE joining SET highersecondryurl=? WHERE email=?",[highersecondryurl,req.body.email],(err,result)=>{
     console.log("result :",result);
     console.log("req.body.email :",req.body.email)
     // console.log("req.body.photo :",req.body.photo)
       if(err){
-        res.status(401).json({SUCCESS:false})
+        // res.status(401).send({SUCCESS:false})
         console.log("error :",err);
       }
       else{
-        res.status(200).json({SUCCESS:true})
+        // res.status(200).send({SUCCESS:true})
         console.log("result :",result);
-      }
+     }
   })    
   
   }
   if(req.body.graduation){
-    console.log("req.body.graduation :",req.body.graduation);
+    console.log("file3:")
+    //console.log("req.body.graduation :",req.body.graduation);
     let date = new Date().toLocaleString();
   console.log("date :",date)
   let dataString = date.replace(" ", "-");
@@ -526,8 +531,9 @@ router.post("/upload/hs/hrs/grd/pgrd",(req,res)=>{
       /^data:([A-Za-z-+\/]+);base64,(.+)$/
     ),
     response = {};
-    console.log("matches :",matches)
-  if (matches.length !== 3) {
+   if (matches.length !== 3) {
+    // console.log("matches.length :",matches.length)
+  
     return new Error("Invalid input string");
   }
   response.type = matches[1];
@@ -564,24 +570,25 @@ router.post("/upload/hs/hrs/grd/pgrd",(req,res)=>{
     "utf8"
   );
   const graduationurl = `${req.protocol}://${req.hostname}:${process.env.PORT}/images/photo/${fileName}`;
-  console.log("graduationurl :",graduationurl);  
+  //console.log("graduationurl :",graduationurl);  
   connection.query("UPDATE joining SET graduationurl=? WHERE email=?",[graduationurl,req.body.email],(err,result)=>{
     console.log("result :",result);
     console.log("req.body.email :",req.body.email)
     // console.log("req.body.photo :",req.body.photo)
       if(err){
-        res.status(401).json({SUCCESS:false})
+        res.status(401).send({SUCCESS:false})
         console.log("error :",err);
       }
       else{
-        res.status(200).json({SUCCESS:true})
+        // res.status(200).send({SUCCESS:true})
         console.log("result :",result);
       }
   })    
   
   }
   if(req.body.postgraduation){
-    console.log("req.body.postgraduation :",req.body.postgraduation);
+    console.log("file4 :")
+    //console.log("req.body.postgraduation :",req.body.postgraduation);
     let date = new Date().toLocaleString();
   console.log("date :",date)
   let dataString = date.replace(" ", "-");
@@ -592,8 +599,9 @@ router.post("/upload/hs/hrs/grd/pgrd",(req,res)=>{
       /^data:([A-Za-z-+\/]+);base64,(.+)$/
     ),
     response = {};
-    console.log("matches :",matches)
-  if (matches.length !== 3) {
+    if (matches.length !== 3) {
+      // console.log("matches.length :",matches.length);
+  
     return new Error("Invalid input string");
   }
   response.type = matches[1];
@@ -630,27 +638,27 @@ router.post("/upload/hs/hrs/grd/pgrd",(req,res)=>{
     "utf8"
   );
   const postgraduationurl = `${req.protocol}://${req.hostname}:${process.env.PORT}/images/photo/${fileName}`;
-  console.log("postgraduationurl :",postgraduationurl);  
-  connection.query("UPDATE joining SET postgraduation_url=? WHERE email=?",[postgraduationurl,req.body.email],(err,result)=>{
+  //console.log("postgraduationurl :",postgraduationurl);  
+  connection.query("UPDATE joining SET postgraduationurl=? WHERE email=?",[postgraduationurl,req.body.email],(err,result)=>{
     console.log("result :",result);
     console.log("req.body.email :",req.body.email)
     // console.log("req.body.photo :",req.body.photo)
       if(err){
-        res.status(401).json({SUCCESS:false})
+        // res.status(401).send({SUCCESS:false})
         console.log("error :",err);
       }
       else{
-        res.status(200).json({SUCCESS:true})
+        // res.status(200).send({SUCCESS:true})
         console.log("result :",result);
       }
   })    
   
-  }else{
-    console.log("error")
-  }
+}
+return res.status(200).json({
+  status: "success",
+});
   
 })
-
 
 const uploadImage =  (req, res, next) => {
   // to declare some path to store your converted image
