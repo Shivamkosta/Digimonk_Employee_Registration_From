@@ -1,11 +1,11 @@
 const express = require('express');
 const router = express.Router();
 const connection = require('./connection');
-const upload = require('./imageupload');
+//const upload = require('./imageupload');
 const nodemailer = require('nodemailer');
 const jwt = require("jsonwebtoken"); // to generate signed token
 const expressJwt = require("express-jwt"); // for authorization check
-const verifyToken = require('../auth/auth');
+//const verifyToken = require('../auth/auth');
 const fs = require('fs');
 const path = require('path');
 const mime = require('mime');
@@ -249,8 +249,8 @@ transporter.sendMail(mailOption,function(err,info){
   
 })
 
-// GET API
-router.get('/get/employee',verifyToken,(req,res,next)=>{
+// GET ALL DATA
+router.get('/getall/employee',(req,res,next)=>{
     console.log('get api is running');
     res.writeHead(200,{'Content-Type':'text/json'});
     connection.query('Select * from joining',(err,result)=>{
@@ -307,7 +307,7 @@ router.get('/get/read',(req,res)=>{
             }
         })
     })
-})
+});
 
 
 //photo upload
@@ -381,7 +381,7 @@ router.post("/uploadphoto/",(req,res)=>{
 // upload highschool,highersecondry,graduation,postgraduation
 router.post("/upload/hs/hrs/grd/pgrd",(req,res)=>{ 
    
-  if(req.body.highschool)
+  if(req.body.highschoolurl)
   {
     console.log("file1 :");
     //console.log("req.body.highschool :",req.body.highschool)
@@ -391,7 +391,7 @@ router.post("/upload/hs/hrs/grd/pgrd",(req,res)=>{
     console.log("dataString :",dataString)
     let dateupdate = dataString.replace(" ", "-");
     console.log("dateupdate :",dateupdate);
-    var matches =  req.body.highschool.match(
+    var matches =  req.body.highschoolurl.match(
       /^data:([A-Za-z-+\/]+);base64,(.+)$/
     ),
     response = {};
@@ -450,7 +450,7 @@ router.post("/upload/hs/hrs/grd/pgrd",(req,res)=>{
     })    
   
   }
-  if(req.body.highersecondry){
+  if(req.body.highersecondryurl){
     console.log("file2:");
     //console.log("req.body.highersecondry :",req.body.highersecondry);
     let date = new Date().toLocaleString();
@@ -459,7 +459,7 @@ router.post("/upload/hs/hrs/grd/pgrd",(req,res)=>{
   console.log("dataString :",dataString)
   let dateupdate = dataString.replace(" ", "-");
   console.log("dateupdate :",dateupdate);
-  var matches =  req.body.highersecondry.match(
+  var matches =  req.body.highersecondryurl.match(
       /^data:([A-Za-z-+\/]+);base64,(.+)$/
     ),
     response = {};
@@ -518,7 +518,7 @@ router.post("/upload/hs/hrs/grd/pgrd",(req,res)=>{
   })    
   
   }
-  if(req.body.graduation){
+  if(req.body.graduationurl){
     console.log("file3:")
     //console.log("req.body.graduation :",req.body.graduation);
     let date = new Date().toLocaleString();
@@ -527,7 +527,7 @@ router.post("/upload/hs/hrs/grd/pgrd",(req,res)=>{
   console.log("dataString :",dataString)
   let dateupdate = dataString.replace(" ", "-");
   console.log("dateupdate :",dateupdate);
-  var matches =  req.body.graduation.match(
+  var matches =  req.body.graduationurl.match(
       /^data:([A-Za-z-+\/]+);base64,(.+)$/
     ),
     response = {};
@@ -586,7 +586,7 @@ router.post("/upload/hs/hrs/grd/pgrd",(req,res)=>{
   })    
   
   }
-  if(req.body.postgraduation){
+  if(req.body.postgraduationurl){
     console.log("file4 :")
     //console.log("req.body.postgraduation :",req.body.postgraduation);
     let date = new Date().toLocaleString();
@@ -595,7 +595,7 @@ router.post("/upload/hs/hrs/grd/pgrd",(req,res)=>{
   console.log("dataString :",dataString)
   let dateupdate = dataString.replace(" ", "-");
   console.log("dateupdate :",dateupdate);
-  var matches =  req.body.postgraduation.match(
+  var matches =  req.body.postgraduationurl.match(
       /^data:([A-Za-z-+\/]+);base64,(.+)$/
     ),
     response = {};
@@ -660,56 +660,30 @@ return res.status(200).json({
   
 })
 
-const uploadImage =  (req, res, next) => {
-  // to declare some path to store your converted image
-  const matches = req.body.photo.match(/^data:([A-Za-z-+\/]+);base64,(.+)$/);
-  console.log("matches :",matches);
-  const response = {};
-  console.log("response :",response);
-   
-  if (matches.length !== 3) {
-  return new Error('Invalid input string');
-  }
-   
-  response.type = matches[1];
-  response.data = new Buffer(matches, 'base64');
-  let decodedImg = response;
-  let imageBuffer = decodedImg.data;
-  let type = decodedImg.type;
-  let extension = mime.extension(type);
-  let fileName = "image." + extension;
-  try {
-  fs.writeFileSync("./images/" + fileName, imageBuffer, 'utf-8');
-  return res.send({"status":"success"});
-  } catch (e) {
-  next(e);
-  }
-  }
-
   
-  router.post('/upload/image',uploadImage ,(req,res)=>{
-    console.log("req.body :",req.body);
-    connection.query(
-        "insert into joining(photo) value(?)",
-        [            
-            req.body.photo,
+  // router.post('/upload/image',uploadImage ,(req,res)=>{
+  //   console.log("req.body :",req.body);
+  //   connection.query(
+  //       "insert into joining(photo) value(?)",
+  //       [            
+  //           req.body.photo,
                   
 
-        ],
-        (err,result)=>{
-          console.log("error :",err);
-          console.log("result :",result);
-            if(err){
+  //       ],
+  //       (err,result)=>{
+  //         console.log("error :",err);
+  //         console.log("result :",result);
+  //           if(err){
               
                 
-                res.status(404).json({SUCCESS:false})
-            }else{
-                res.status(200).json({SUCCESS:true});
-                console.log(result)
-            }
-        }
-    )
-  });
+  //               res.status(404).json({SUCCESS:false})
+  //           }else{
+  //               res.status(200).json({SUCCESS:true});
+  //               console.log(result)
+  //           }
+  //       }
+  //   )
+  // });
 
 //UPDATE Employee Details
 router.put('/update/empdetails/:id',(req,res,next)=>{
@@ -726,14 +700,27 @@ router.put('/update/empdetails/:id',(req,res,next)=>{
     var dateofjoining = x.dateofjoining;
     var presentaddress = x.presentaddress;
     var permanentaddress = x.permanentaddress;
+    var bankname = x.bankname;
+    var ifsc = x.ifsc;
+    var bankaccount = x.bankaccount;
+    var PF = x.PF;
+    var emergencyname = x.emergencyname;
+    var emergencycontact = x.emergencycontact;
+    var emergencyaddress = x.emergencyaddress;
+    var relation = x.relation;
+    var photourl = x.photourl;
+    var highschoolurl = x.highschoolurl;
+    var highersecondryurl = x.highersecondryurl;
+    var graduationurl = x.graduationurl;
+    var postgraduationurl = x.postgraduationurl;
 
 
-    connection.query(`Update joining SET firstname=?,lastname=?,dob=?,email=?,gender=?,matrimony=?,mobile=?,dateofjoining=?,presentaddress=?,permanentaddress=? WHERE id='${req.params.id}'`
-    ,[firstname,lastname,dob,email,gender,matrimony,mobile,dateofjoining,presentaddress,permanentaddress],
+    connection.query(`Update joining SET firstname=?,lastname=?,dob=?,email=?,gender=?,matrimony=?,mobile=?,dateofjoining=?,presentaddress=?,permanentaddress=?,bankname=?,ifsc=?,bankaccount=?,PF=?,emergencyname=?,emergencycontact=?,emergencyaddress=?,relation=?,photourl=?,highschoolurl=?,highersecondryurl=?,graduationurl=?,postgraduation=? WHERE id='${req.params.id}'`
+    ,[firstname,lastname,dob,email,gender,matrimony,mobile,dateofjoining,presentaddress,permanentaddress,bankname,bankaccount,ifsc,PF,emergencyname,emergencycontact,emergencyaddress,relation,photourl,highschoolurl,highersecondryurl,graduationurl,postgraduationurl],
     function(err,result){
         if(err) throw err;
-        res.json({SUCCESS:true,message:'User has been updated successfully',id:req.params.id})
-        console.log(result)
+        res.json({status:true,message:'User has been updated successfully',id:req.params.id})
+        console.log("result :",result);
     })
 
 });
