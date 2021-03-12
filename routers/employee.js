@@ -333,13 +333,14 @@ router.get('/get/read', (req, res) => {
 router.post("/uploadphoto/", (req, res) => {
 
   //upload file
-  let date = new Date().toLocaleString();
+  if(req.body.photourl.startsWith("http://") != req.body.photourl){
+    let date = new Date().toLocaleString();
   console.log("date :", date)
   let dataString = date.replace(" ", "-");
   console.log("dataString :", dataString)
   let dateupdate = dataString.replace(" ", "-");
   console.log("dateupdate :", dateupdate);
-  var matches = req.body.photo.match(
+  var matches = req.body.photourl.match(
     /^data:([A-Za-z-+\/]+);base64,(.+)$/
   ),
     response = {};
@@ -381,21 +382,29 @@ router.post("/uploadphoto/", (req, res) => {
     "utf8"
   );
   const photourl = `${req.protocol}://${req.hostname}:${process.env.PORT}/images/photo/${fileName}`;
-  console.log("photourl :", photourl);
-  connection.query("UPDATE joining SET photourl=? WHERE email=?", [photourl, req.body.email], (err, result) => {
+  //console.log("photourl :", photourl);
+  connection.query("UPDATE joining SET photourl=? WHERE email=?", [photourl,req.body.email], (err, result) => {
     console.log("result :", result);
     console.log("req.body.email :", req.body.email)
     // console.log("req.body.photo :",req.body.photo)
     if (err) {
-      res.status(401).json({ SUCCESS: false })
+      // res.status(401).json({ status: false })
       console.log("error :", err);
     }
     else {
-      res.status(200).json({ SUCCESS: true })
+      // res.status(200).json({ status: true })
       console.log("result :", result);
     }
   })
+    
+  }
 
+  return res.status(200).json({
+      status:true,
+
+  })
+
+  
 })
 
 // upload highschool,highersecondry,graduation,postgraduation
@@ -891,8 +900,6 @@ router.put('/update/emergencydetails/:id', (req, res, next) => {
     var emergencyname = x.emergencyname;
     var emergencycontact = x.emergencycontact;
     var emergencyaddress = x.emergencyaddress;
-
-
     connection.query(`Update joining SET PF=?,emergencyname=?,emergencycontact=?,emergencyaddress=? WHERE id='${req.params.id}'`
       , [PF, emergencyname, emergencycontact, emergencyaddress],
       function (err, result) {
