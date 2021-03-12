@@ -1,15 +1,13 @@
 const express = require('express');
 const router = express.Router();
 const connection = require('./connection');
-//const upload = require('./imageupload');
 const nodemailer = require('nodemailer');
 const jwt = require("jsonwebtoken"); // to generate signed token
 const expressJwt = require("express-jwt"); // for authorization check
-//const verifyToken = require('../auth/auth');
 const fs = require('fs');
 const path = require('path');
 const mime = require('mime');
-// const isAdmin = require('../auth/auth');
+
 
 router.post("/login", (req, res) => {
   var e = req.body.email;
@@ -334,6 +332,7 @@ router.get('/get/read', (req, res) => {
 //photo upload
 router.post("/uploadphoto/", (req, res) => {
 
+  //upload file
   let date = new Date().toLocaleString();
   console.log("date :", date)
   let dataString = date.replace(" ", "-");
@@ -752,6 +751,57 @@ router.put('/update/empdetails/:id', (req, res, next) => {
       error: "Admin resourse! Access denied"
     });
   } else {
+
+  //upload file
+  let date = new Date().toLocaleString();
+  console.log("date :", date)
+  let dataString = date.replace(" ", "-");
+  console.log("dataString :", dataString)
+  let dateupdate = dataString.replace(" ", "-");
+  console.log("dateupdate :", dateupdate);
+  var matches = req.body.photo.match(
+    /^data:([A-Za-z-+\/]+);base64,(.+)$/
+  ),
+    response = {};
+  console.log("matches :", matches)
+  if (matches.length !== 3) {
+    return new Error("Invalid input string");
+  }
+  response.type = matches[1];
+  console.log("response.type :", response.type);
+  response.data = new Buffer.from(matches[2], "base64");
+  console.log("response.data :", response.data);
+  let decodedImg = response;
+  console.log("decodedImg :", decodedImg)
+  let imageBuffer = decodedImg.data;
+  console.log("imageBuffer :", imageBuffer);
+  let type = decodedImg.type;
+  console.log("type :", type);
+  const name = type.split("/");
+  console.log("name :", name);
+  const name1 = name[0];
+  console.log("name1 :", name1);
+  let extension = mime.getExtension(type);
+  console.log("extension :", extension);
+  const rand = Math.ceil(Math.random() * 1000);
+  console.log("random :", rand);
+  //Random photo name with timeStamp so it will not overide previous images.
+  const fileName = `photo_${Date.now()}.${extension}`;
+  console.log("fileName :", fileName);
+  const path3 = path.resolve(`./public/images`);
+  console.log("path3 :", path3);
+  const localpath = `${path3}/photo/`;
+  console.log("localpath :", localpath);
+  if (!fs.existsSync(localpath)) {
+    fs.mkdirSync(localpath, { recursive: true });
+  }
+  fs.writeFileSync(
+    `${localpath}` + fileName,
+    imageBuffer,
+    "utf8"
+  );
+  const photourl = `${req.protocol}://${req.hostname}:${process.env.PORT}/images/photo/${fileName}`;
+  // console.log("photourl :", photourl);
     var x = req.body;
     var firstname = x.firstname;
     var lastname = x.lastname;
@@ -763,12 +813,7 @@ router.put('/update/empdetails/:id', (req, res, next) => {
     var dateofjoining = x.dateofjoining;
     var presentaddress = x.presentaddress;
     var permanentaddress = x.permanentaddress;
-    var photourl = x.photourl;
-    // var highschoolurl = x.highschoolurl;
-    // var highersecondryurl = x.highersecondryurl;
-    // var graduationurl = x.graduationurl;
-    // var postgraduationurl = x.postgraduationurl;
-
+    // var photourl = x.photourl;
 
     connection.query(`Update joining SET firstname=?,lastname=?,dob=?,email=?,gender=?,matrimony=?,mobileno=?,dateofjoining=?,presentaddress=?,permanentaddress=?,photourl=? WHERE id='${req.params.id}'`
       , [firstname, lastname, dob, email, gender, matrimony, mobileno, dateofjoining, presentaddress, permanentaddress, photourl],
@@ -789,9 +834,7 @@ router.put('/update/empdetails/:id', (req, res, next) => {
         }
         // res.json({ status: true, message: 'User has been updated successfully', id: req.params.id })
         
-      })
-
-    
+      })    
   }
 
 });
